@@ -1,6 +1,6 @@
 use std::iter::Iterator;
 
-pub trait DataSink {
+pub trait BipackSink {
     fn put_u8(self: &mut Self, data: u8) -> &Self;
 
     fn put_fixed_bytes(self: &mut Self, data: &[u8]) -> &Self {
@@ -42,23 +42,10 @@ const V0LIMIT: u64 = 1u64 << 6;
 const V1LIMIT: u64 = 1u64 << 14;
 const V2LIMIT: u64 = 1u64 << 22;
 
-impl DataSink for Vec<u8> {
+impl BipackSink for Vec<u8> {
     fn put_u8(self: &mut Self, data: u8) -> &Self {
         self.push(data);
         self
     }
-}
-
-const HEX_DIGS: [char; 16] = [
-    '0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-];
-pub fn to_hex(src: &[u8]) -> Box<String> {
-    let mut result   = Vec::new();
-    for i in src {
-        result.push( HEX_DIGS[(i>>4) as usize]);
-        result.push( HEX_DIGS[(i&15) as usize]);
-    }
-    Box::new(String::from_iter(result))
 }
 
