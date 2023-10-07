@@ -1,3 +1,5 @@
+use std::string::FromUtf8Error;
+
 /// Data source compatible with mp_bintools serialization. It supports
 /// fixed-size integers in rihgt order and varint ans smartint encodings
 /// separately.
@@ -50,6 +52,20 @@ pub trait BipackSource {
         self.smart_u64() as u16
     }
     fn smart_u32(self: &mut Self) -> u32 { self.smart_u64() as u32 }
+
+    fn fixed_bytes(self: &mut Self,size: usize) -> Vec<u8> {
+        let mut result = Vec::with_capacity(size);
+        for i in 0..size { result.push(self.u8()); }
+        result
+    }
+
+    fn var_bytes(self: &mut Self) -> Vec<u8> {
+        let size = self.smart_u64() as usize;
+        self.fixed_bytes(size)
+    }
+    fn str(self: &mut Self) -> Result<String, FromUtf8Error> {
+        String::from_utf8(self.var_bytes())
+    }
 }
 
 pub struct SliceSource<'a> {
