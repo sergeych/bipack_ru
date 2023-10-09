@@ -5,6 +5,9 @@ const V0LIMIT: u64 = 1u64 << 6;
 const V1LIMIT: u64 = 1u64 << 14;
 const V2LIMIT: u64 = 1u64 << 22;
 
+/// Numeric value convertible to Unsigned 64 bit to be used
+/// with [BipackSink#put_unsigned] compressed format. It is implemented fir usize
+/// and u* types already.
 pub trait IntoU64 {
     fn into_u64(self) -> u64;
 }
@@ -21,7 +24,9 @@ macro_rules! into_u64 {
 
 into_u64!(u8, u16, u32, usize, u64);
 
-
+/// Data sink to encode bipack binary format.
+///
+/// To implement just override [put_u8] and optionally [put_fixed_bytes]
 pub trait BipackSink {
     fn put_u8(self: &mut Self, data: u8);
 
@@ -64,6 +69,9 @@ pub trait BipackSink {
         self.put_fixed_bytes(&result);
     }
 
+    /// Put unsigned value to compressed variable-length format, `Smartint` in the bipack
+    /// terms. This format is used to store size of variable-length binaries and strings.
+    /// Use [BipackSource::unsigned()] to unpack it.
     fn put_unsigned<T: IntoU64>(self: &mut Self, number: T) {
         let value = number.into_u64();
         let mut encode_seq = |ty: u8, bytes: &[u64]| {
