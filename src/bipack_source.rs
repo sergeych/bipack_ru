@@ -4,7 +4,7 @@ use std::string::FromUtf8Error;
 use crate::bipack_source::BipackError::NoDataError;
 
 /// Result of error-aware bipack function
-pub(crate) type Res<T> = Result<T, BipackError>;
+pub(crate) type Result<T> = std::result::Result<T, BipackError>;
 
 /// There is not enought data to fulfill the request
 #[derive(Debug, Clone)]
@@ -29,25 +29,29 @@ impl Error for BipackError {}
 ///
 /// To implement source for other type, implement just [u8()] or mayve also
 /// [fixed_bytes] for effectiveness.
+///
+/// Unlike the [crate::bipack_sink::BipackSink] the source is returning errors. This is because
+/// it often appears when reading data do not correspond to the packed one, and this is an often
+/// case that requires proper reaction, not just a panic attack :)
 pub trait BipackSource {
-    fn get_u8(self: &mut Self) -> Res<u8>;
+    fn get_u8(self: &mut Self) -> Result<u8>;
 
-    fn get_u16(self: &mut Self) -> Res<u16> {
+    fn get_u16(self: &mut Self) -> Result<u16> {
         Ok(((self.get_u8()? as u16) << 8) + (self.get_u8()? as u16))
     }
-    fn get_u32(self: &mut Self) -> Res<u32> {
+    fn get_u32(self: &mut Self) -> Result<u32> {
         Ok(((self.get_u16()? as u32) << 16) + (self.get_u16()? as u32))
     }
 
-    fn get_u64(self: &mut Self) -> Res<u64> {
+    fn get_u64(self: &mut Self) -> Result<u64> {
         Ok(((self.get_u32()? as u64) << 32) | (self.get_u32()? as u64))
     }
 
     /// Unpack variable-length packed unsigned value, used aslo internally to store size
     /// of arrays, binary data, strings, etc. To pack use
     /// [crate::bipack_sink::BipackSink::put_unsigned()].
-    fn get_unsigned(self: &mut Self) -> Res<u64> {
-        let mut get = || -> Res<u64> { Ok(self.get_u8()? as u64) };
+    fn get_unsigned(self: &mut Self) -> Result<u64> {
+        let mut get = || -> Result<u64> { Ok(self.get_u8()? as u64) };
         let first = get()?;
         let mut ty = first & 3;
 
@@ -68,7 +72,7 @@ pub trait BipackSource {
 
     /// read 8-bytes varint-packed unsigned value from the source. We dont' recommend
     /// using it directly; use [get_unsigned] instead.
-    fn get_varint_unsigned(self: &mut Self) -> Res<u64> {
+    fn get_varint_unsigned(self: &mut Self) -> Result<u64> {
         let mut result = 0u64;
         let mut count = 0;
         loop {
@@ -81,17 +85,17 @@ pub trait BipackSource {
 
     /// read 2-bytes unsigned value from the source as smartint-encoded, same as [get_unsigned]
     /// as u16
-    fn get_packed_u16(self: &mut Self) -> Res<u16> {
+    fn get_packed_u16(self: &mut Self) -> Result<u16> {
         Ok(self.get_unsigned()? as u16)
     }
 
     /// read 4-bytes unsigned value from the source
     /// read 2-bytes unsigned value from the source as smartint-encoded, same as [get_unsigned]
     /// as u32
-    fn get_packed_u32(self: &mut Self) -> Res<u32> { Ok(self.get_unsigned()? as u32) }
+    fn get_packed_u32(self: &mut Self) -> Result<u32> { Ok(self.get_unsigned()? as u32) }
 
     /// read exact number of bytes from the source as a vec.
-    fn get_fixed_bytes(self: &mut Self, size: usize) -> Res<Vec<u8>> {
+    fn get_fixed_bytes(self: &mut Self, size: usize) -> Result<Vec<u8>> {
         let mut result = Vec::with_capacity(size);
         for i in 0..size { result.push(self.get_u8()?); }
         Ok(result)
@@ -101,7 +105,7 @@ pub trait BipackSource {
     /// by [BipackSink::put_var_bytes] or [BipackSink::put_string]. The size is encoded
     /// the same way as does [BipackSink::put_unsigned] and can be manually read by
     /// [BipackSource::get_unsigned].
-    fn var_bytes(self: &mut Self) -> Res<Vec<u8>> {
+    fn var_bytes(self: &mut Self) -> Result<Vec<u8>> {
         let size = self.get_unsigned()? as usize;
         self.get_fixed_bytes(size)
     }
@@ -109,7 +113,7 @@ pub trait BipackSource {
     /// REad a variable length string from a source packed with
     /// [BipavkSink::put_string]. It is a variable sized array fo utf8 encoded
     /// characters.
-    fn str(self: &mut Self) -> Res<String> {
+    fn str(self: &mut Self) -> Result<String> {
         String::from_utf8(
             self.var_bytes()?
         ).or_else(|e| Err(BipackError::BadEncoding(e)))
@@ -130,7 +134,7 @@ impl<'a> SliceSource<'a> {
 }
 
 impl<'x> BipackSource for SliceSource<'x> {
-    fn get_u8(self: &mut Self) -> Res<u8> {
+    fn get_u8(self: &mut Self) -> Result<u8> {
         if self.position >= self.data.len() {
             Err(NoDataError)
         } else {

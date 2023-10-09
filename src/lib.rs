@@ -19,14 +19,13 @@ mod to_dump;
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
     use base64::Engine;
     use crate::bipack_sink::{BipackSink};
-    use crate::bipack_source::{BipackSource, Res, SliceSource};
+    use crate::bipack_source::{BipackSource, Result, SliceSource};
     use crate::to_dump::to_dump;
 
     #[test]
-    fn fixed_unpack() -> Result<(),Box<dyn Error>> {
+    fn fixed_unpack() -> Result<()> {
         let mut src = Vec::new();
         base64::engine::general_purpose::STANDARD_NO_PAD
             .decode_vec("B/oAAAEB0AAAANjLgKAv", &mut src)
@@ -42,7 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn smartint_unpack() -> Res<()> {
+    fn smartint_unpack() -> Result<()> {
         let mut src = Vec::new();
         base64::engine::general_purpose::STANDARD_NO_PAD
             .decode_vec("BwLoA0IHBL+AAq7GDQ", &mut src)

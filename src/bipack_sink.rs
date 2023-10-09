@@ -26,7 +26,13 @@ into_u64!(u8, u16, u32, usize, u64);
 
 /// Data sink to encode bipack binary format.
 ///
-/// To implement just override [put_u8] and optionally [put_fixed_bytes]
+/// To implement just override [put_u8] and optionally [put_fixed_bytes].
+///
+/// Note that the sink is not returning errors, unlike [crate::bipack_source::BipackSource].
+/// It is supposed that the sink has unlimited
+/// size for the context of data it is used for. This is practical. For the case of overflow-aware
+/// sink you can create one that ignores extra data when overflow is detected and report it
+/// somehow, but for encoding it does not worth effort (data size could be estimated in advance).
 pub trait BipackSink {
     fn put_u8(self: &mut Self, data: u8);
 
