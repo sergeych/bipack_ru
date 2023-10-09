@@ -26,7 +26,7 @@ into_u64!(u8, u16, u32, usize, u64);
 
 /// Data sink to encode bipack binary format.
 ///
-/// To implement just override [put_u8] and optionally [put_fixed_bytes].
+/// To implement just override [BipackSink::put_u8] and optionally [BipackSink::put_fixed_bytes].
 ///
 /// Note that the sink is not returning errors, unlike [crate::bipack_source::BipackSource].
 /// It is supposed that the sink has unlimited
@@ -77,7 +77,7 @@ pub trait BipackSink {
 
     /// Put unsigned value to compressed variable-length format, `Smartint` in the bipack
     /// terms. This format is used to store size of variable-length binaries and strings.
-    /// Use [BipackSource::unsigned()] to unpack it.
+    /// Use [crate::bipack_source::BipackSource::get_unsigned] to unpack it.
     fn put_unsigned<T: IntoU64>(self: &mut Self, number: T) {
         let value = number.into_u64();
         let mut encode_seq = |ty: u8, bytes: &[u64]| {

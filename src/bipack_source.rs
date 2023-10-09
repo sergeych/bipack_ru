@@ -4,18 +4,18 @@ use std::string::FromUtf8Error;
 use crate::bipack_source::BipackError::NoDataError;
 
 /// Result of error-aware bipack function
-pub(crate) type Result<T> = std::result::Result<T, BipackError>;
+pub type Result<T> = std::result::Result<T, BipackError>;
 
 /// There is not enought data to fulfill the request
 #[derive(Debug, Clone)]
 pub enum BipackError {
     NoDataError,
-    BadEncoding(FromUtf8Error)
+    BadEncoding(FromUtf8Error),
 }
 
 impl Display for BipackError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{:?}", self)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -24,11 +24,11 @@ impl Error for BipackError {}
 
 /// Data source compatible with mp_bintools serialization. It supports
 /// fixed-size integers in right order and varint ans smartint encodings
-/// separately. There is out of the box implementation for [Vec<u8>], and
+/// separately. There is out of the box implementation for [`Vec<u8>`], and
 /// it is easy to implements your own.
 ///
-/// To implement source for other type, implement just [u8()] or mayve also
-/// [fixed_bytes] for effectiveness.
+/// To implement source for other type, implement just [BipackSource::get_u8] or mayve also
+/// [BipackSource::get_fixed_bytes] for effectiveness.
 ///
 /// Unlike the [crate::bipack_sink::BipackSink] the source is returning errors. This is because
 /// it often appears when reading data do not correspond to the packed one, and this is an often
@@ -71,7 +71,7 @@ pub trait BipackSource {
     }
 
     /// read 8-bytes varint-packed unsigned value from the source. We dont' recommend
-    /// using it directly; use [get_unsigned] instead.
+    /// using it directly; use [BipackSource::get_unsigned] instead.
     fn get_varint_unsigned(self: &mut Self) -> Result<u64> {
         let mut result = 0u64;
         let mut count = 0;
@@ -83,15 +83,15 @@ pub trait BipackSource {
         }
     }
 
-    /// read 2-bytes unsigned value from the source as smartint-encoded, same as [get_unsigned]
-    /// as u16
+    /// read 2-bytes unsigned value from the source as smartint-encoded, same as
+    /// [BipackSource::get_unsigned] as u16
     fn get_packed_u16(self: &mut Self) -> Result<u16> {
         Ok(self.get_unsigned()? as u16)
     }
 
     /// read 4-bytes unsigned value from the source
-    /// read 2-bytes unsigned value from the source as smartint-encoded, same as [get_unsigned]
-    /// as u32
+    /// read 2-bytes unsigned value from the source as smartint-encoded, same as
+    /// [BipackSource::get_unsigned] as u32.
     fn get_packed_u32(self: &mut Self) -> Result<u32> { Ok(self.get_unsigned()? as u32) }
 
     /// read exact number of bytes from the source as a vec.
@@ -102,8 +102,9 @@ pub trait BipackSource {
     }
 
     /// Read variable-length byte array from the source (with packed size), created
-    /// by [BipackSink::put_var_bytes] or [BipackSink::put_string]. The size is encoded
-    /// the same way as does [BipackSink::put_unsigned] and can be manually read by
+    /// by [crate::bipack_sink::BipackSink::put_var_bytes] or
+    /// [crate::bipack_sink::BipackSink::put_str]. The size is encoded the same way as does
+    /// [crate::bipack_sink::BipackSink::put_unsigned] and can be manually read by
     /// [BipackSource::get_unsigned].
     fn var_bytes(self: &mut Self) -> Result<Vec<u8>> {
         let size = self.get_unsigned()? as usize;
@@ -111,7 +112,7 @@ pub trait BipackSource {
     }
 
     /// REad a variable length string from a source packed with
-    /// [BipavkSink::put_string]. It is a variable sized array fo utf8 encoded
+    /// [crate::bipack_sink::BipackSink::put_str]. It is a variable sized array fo utf8 encoded
     /// characters.
     fn str(self: &mut Self) -> Result<String> {
         String::from_utf8(
@@ -121,7 +122,7 @@ pub trait BipackSource {
 }
 
 /// The bipack source capable of extracting data from a slice.
-/// use [SliceSource::from()] or [bipack_source()] to create one.
+/// use [SliceSource::from()] to create one.
 pub struct SliceSource<'a> {
     data: &'a [u8],
     position: usize,
