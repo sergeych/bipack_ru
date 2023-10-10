@@ -34,6 +34,8 @@
 //! - [tools::to_dump] utility function converts binary data into human-readable dump as in old goot
 //!   times (address, bytes, ASCII characters).
 //!
+//! - [tools::StringBuilder] minimalistic growing strings builder.
+//!
 //! ## About Bipack format
 //!
 //! This is a binary format created wround the idea of bit-effectiveness and not disclosing
@@ -190,7 +192,13 @@ mod tests {
             for u in 0..l {
                 d2.push(u as u8);
             }
-            println!("size {}\n{}", d2.len(), to_dump(&d2));
+            // println!("size {}\n{}", d2.len(), to_dump(&d2));
+            if d2.len() == 41 {
+                let x = to_dump(&d2);
+                assert_eq!(x, "0000 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f |................|
+0010 10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f |................|
+0020 20 21 22 23 24 25 26 27 28                      | !\"#$%&'(       |\n");
+            }
         }
     }
 }

@@ -12,7 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use string_builder::Builder;
+// use string_builder::Builder;
+
+use std::string::FromUtf8Error;
+
+/// Absolutely minimalistic string builder (growing string implemented minimal and
+/// more or less effective). Just to avoid dependencies for better .wasm usage.
+pub struct StringBuilder(Vec<u8>);
+
+impl StringBuilder {
+    /// Append something string-like (you can use &str and String for example) to the buffer.
+    fn append<T: AsRef<str>>(self: &mut Self, text: T) {
+        for b in text.as_ref().bytes() { self.0.push(b) }
+    }
+
+    /// Append char as far as it is a valid char in rust limited sense:
+    fn append_char(self: &mut Self, c: char) {
+        self.append(String::from(c))
+    }
+
+    /// Finalize the builder and return the result string.
+    fn string(self: &mut Self) -> Result<String, FromUtf8Error> {
+        String::from_utf8(self.0.clone())
+    }
+
+    fn new() -> StringBuilder { StringBuilder(Vec::new()) }
+}
+
 
 /// Convert binary data into text dump, human readable, like:
 /// ```text
@@ -24,20 +50,20 @@ use string_builder::Builder;
 pub fn to_dump(data: &[u8]) -> String {
     let mut offset = 0usize;
     let mut counter = 0;
-    let mut result = Builder::default();
+    let mut result = StringBuilder::new();
 
-    fn ascii_dump(result: &mut Builder, counter: usize, data: &[u8], offset: usize) {
+    fn ascii_dump(result: &mut StringBuilder, counter: usize, data: &[u8], offset: usize) {
         for i in counter..16 { result.append("   "); }
         result.append("|");
         for i in 0..counter {
             let b = data[offset - counter + i];
             if b >= 32 && b <= 127 {
-                result.append(b as char)
+                result.append_char(b as char)
             } else {
-                result.append('.');
+                result.append_char('.');
             }
         }
-        for i in counter..16 { result.append(' '); }
+        for i in counter..16 { result.append_char(' '); }
         result.append("|\n");
     }
 

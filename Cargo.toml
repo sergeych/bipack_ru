@@ -4,14 +4,13 @@ version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "binary size-effective format used in Divan smart contracts, wasm bindings, network protocols, etc."
+homepage = "https://gitea.sergeych.net/Divan/bipack_ru"
+repository = "https://gitea.sergeych.net/Divan/bipack_ru"
+readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#anyhow = "1.0"
-lazy_static = "1.4.0"
-string-builder = "0.2.0"
 
 [dev-dependencies]
 base64 = "0.21.4"
 hex = "0.4.3"
-derive_more = "0.99.17"
