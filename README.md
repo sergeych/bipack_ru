@@ -2,6 +2,10 @@
 
 This is Bipack format implementation, minimalistic by purpose.
 
+>__IMPORTANT__ due to growing tensions in the world, the main development is moved to our [Gitea repository](https://gitea.sergeych.net/Divan/bipack_ru). We will try our best to make it available all around the world; it is hosted outside the USA and not by USA company.
+
+The most recent code will be there, and we encourage to use it also for issues/discussions.
+
 > work in progress.
 
 ## Already implemented:
