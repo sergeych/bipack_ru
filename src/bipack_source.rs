@@ -97,6 +97,14 @@ pub trait BipackSource {
         Ok(result | (self.get_varint_unsigned()? << 22))
     }
 
+    /// Unpack variable-length signed value, packed with
+    /// [crate::bipack_sink::BipackSink::put_signed], see it for the  packing details.
+    fn get_signed(self: &mut Self) -> Result<i64> {
+        let value = self.get_unsigned()?;
+        let result = (value >> 1) as i64;
+        Ok(if value & 1 != 0 { -result } else { result } )
+    }
+
     /// read 8-bytes varint-packed unsigned value from the source. We dont' recommend
     /// using it directly; use [BipackSource::get_unsigned] instead.
     fn get_varint_unsigned(self: &mut Self) -> Result<u64> {

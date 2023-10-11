@@ -245,6 +245,33 @@ mod tests {
     }
 
     #[test]
+    fn test_varsigned() -> Result<()> {
+        fn test(value: i64) -> Result<()> {
+            let mut x = Vec::new();
+            x.put_signed(value);
+            assert_eq!(value, SliceSource::from(&x).get_signed()?);
+            Ok(())
+        }
+        fn test2(value: i64) -> Result<()> {
+            test(value)?;
+            test(-value)?;
+            Ok(())
+        }
+        test(0)?;
+        test2(1)?;
+        test2(2)?;
+        test2(64)?;
+        test2(65)?;
+        test2(127)?;
+        test2(128)?;
+        test2(255)?;
+        test2(256)?;
+        test2(2147483647)?;
+        test2(2222147483647)?;
+        Ok(())
+    }
+
+        #[test]
     fn test_packer() -> Result<()>{
         let a = 177u32;
         let b = "hello!";

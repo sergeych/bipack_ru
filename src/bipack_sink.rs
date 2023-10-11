@@ -54,12 +54,12 @@ pub trait BipackSink {
         for b in data { self.put_u8(*b); }
     }
 
-    fn put_var_bytes(self: &mut Self,data: &[u8]) {
+    fn put_var_bytes(self: &mut Self, data: &[u8]) {
         self.put_unsigned(data.len());
         self.put_fixed_bytes(data);
     }
 
-    fn put_str(self: &mut Self,str: &str) {
+    fn put_str(self: &mut Self, str: &str) {
         self.put_var_bytes(str.as_bytes());
     }
 
@@ -118,18 +118,28 @@ pub trait BipackSink {
         };
 
         if value < V0LIMIT {
-                encode_seq(0, &[value]);
-        }
-        else if value < V1LIMIT {
-            encode_seq( 1, &[value & 0x3F, value >> 6]);
-        }
-        else if value < V2LIMIT {
-            encode_seq(  2, &[value & 0x3f, value >> 6, value >> 14]);
-        }
-        else {
+            encode_seq(0, &[value]);
+        } else if value < V1LIMIT {
+            encode_seq(1, &[value & 0x3F, value >> 6]);
+        } else if value < V2LIMIT {
+            encode_seq(2, &[value & 0x3f, value >> 6, value >> 14]);
+        } else {
             encode_seq(3, &[value & 0x3f, value >> 6, value >> 14]);
             self.put_var_unsigned(value >> 22);
         }
+    }
+
+    /// Put variable-length encoded integer value. it is packed just like variable-length
+    /// unsigned value except that LSB (bit 0) is used as negative number flag (when set,
+    /// the encoded number is negative).
+    ///
+    /// Note that because of this the range of supported integers is one bit smaller than
+    /// i64, only 30 bits for value and one for a sign. This will probably be fixed later
+    /// but please note that it is impractical to store really big numbers in variable-length
+    /// format, consider using [put_i64] instead which has no such limitation.
+    fn put_signed(self: &mut Self, val: i64) {
+        let (neg, val) = if val < 0 { (1, -val) } else { (0, val) };
+        self.put_unsigned( (neg as u64) | ((val as u64) << 1) );
     }
 
     fn put_var_unsigned(self: &mut Self, value: u64) {
