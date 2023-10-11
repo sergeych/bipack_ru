@@ -120,7 +120,7 @@ pub trait BipackSource {
     /// [crate::bipack_sink::BipackSink::put_str]. The size is encoded the same way as does
     /// [crate::bipack_sink::BipackSink::put_unsigned] and can be manually read by
     /// [BipackSource::get_unsigned].
-    fn var_bytes(self: &mut Self) -> Result<Vec<u8>> {
+    fn get_var_bytes(self: &mut Self) -> Result<Vec<u8>> {
         let size = self.get_unsigned()? as usize;
         self.get_fixed_bytes(size)
     }
@@ -128,9 +128,9 @@ pub trait BipackSource {
     /// REad a variable length string from a source packed with
     /// [crate::bipack_sink::BipackSink::put_str]. It is a variable sized array fo utf8 encoded
     /// characters.
-    fn str(self: &mut Self) -> Result<String> {
+    fn get_str(self: &mut Self) -> Result<String> {
         String::from_utf8(
-            self.var_bytes()?
+            self.get_var_bytes()?
         ).or_else(|e| Err(BipackError::BadEncoding(e)))
     }
 }

@@ -117,11 +117,15 @@
 pub mod bipack_source;
 pub mod bipack_sink;
 pub mod tools;
+mod bipack;
 
 #[cfg(test)]
 mod tests {
     use base64::Engine;
-    use crate::bipack_sink::{BipackSink};
+
+    use crate::bipack;
+    use crate::bipack::{BiPackable, BiUnpackable};
+    use crate::bipack_sink::BipackSink;
     use crate::bipack_source::{BipackSource, Result, SliceSource};
     use crate::tools::to_dump;
 
@@ -182,7 +186,7 @@ mod tests {
         data.put_str("Hello, rupack!");
         println!("size ${}\n{}",data.len(), to_dump(&data));
         let mut src = SliceSource::from(&data);
-        assert_eq!("Hello, rupack!", src.str().unwrap());
+        assert_eq!("Hello, rupack!", src.get_str().unwrap());
     }
 
     #[test]
@@ -200,5 +204,19 @@ mod tests {
 0020 20 21 22 23 24 25 26 27 28                      | !\"#$%&'(       |\n");
             }
         }
+    }
+
+    #[test]
+    fn test_packer() -> Result<()>{
+        let a = 177u32;
+        let b = "hello!";
+        let sink = bipack!(a, b);
+        println!("{}", to_dump(&sink));
+        let mut source = SliceSource::from(&sink);
+        let a1 = u32::bi_unpack(&mut source)?;
+        let s1 = String::bi_unpack(&mut source)?;
+        assert_eq!(177u32, a1);
+        assert_eq!("hello!", s1);
+        Ok(())
     }
 }
