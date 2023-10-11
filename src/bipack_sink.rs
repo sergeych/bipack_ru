@@ -136,7 +136,7 @@ pub trait BipackSink {
     /// Note that because of this the range of supported integers is one bit smaller than
     /// i64, only 30 bits for value and one for a sign. This will probably be fixed later
     /// but please note that it is impractical to store really big numbers in variable-length
-    /// format, consider using [put_i64] instead which has no such limitation.
+    /// format, consider using [BipackSink::put_i64] instead, it has no such limitation.
     fn put_signed(self: &mut Self, val: i64) {
         let (neg, val) = if val < 0 { (1, -val) } else { (0, val) };
         self.put_unsigned( (neg as u64) | ((val as u64) << 1) );
