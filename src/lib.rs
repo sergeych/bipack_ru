@@ -190,6 +190,44 @@ mod tests {
     }
 
     #[test]
+    fn test_signed() -> Result<()> {
+        fn test64(value: i64) -> Result<()> {
+            let mut x = Vec::new();
+            x.put_i64(value);
+            assert_eq!(value, SliceSource::from(&x).get_i64()?);
+            Ok(())
+        }
+        test64(0)?;
+        test64(1)?;
+        test64(-1)?;
+        test64(9223372036854775807)?;
+        test64(-9223372036854775808)?;
+        fn test32(value: i32) -> Result<()> {
+            let mut x = Vec::new();
+            x.put_i32(value);
+            assert_eq!(value, SliceSource::from(&x).get_i32()?);
+            Ok(())
+        }
+        test32(0)?;
+        test32(1)?;
+        test32(-1)?;
+        test32(2147483647)?;
+        test32(-2147483648)?;
+        fn test16(value: i16) -> Result<()> {
+            let mut x = Vec::new();
+            x.put_i16(value);
+            assert_eq!(value, SliceSource::from(&x).get_i16()?);
+            Ok(())
+        }
+        test16(0)?;
+        test16(1)?;
+        test16(-1)?;
+        test16(32767)?;
+        test16(-32768)?;
+        Ok(())
+    }
+
+    #[test]
     fn test_dump() {
         for l in 0..64 {
             let mut d2 = Vec::new();

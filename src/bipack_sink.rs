@@ -89,6 +89,19 @@ pub trait BipackSink {
         self.put_fixed_bytes(&result);
     }
 
+    fn put_i64(self: &mut Self, value: i64) {
+        self.put_u64(value as u64)
+    }
+    fn put_i32(self: &mut Self, value: i32) {
+        self.put_u32(value as u32)
+    }
+    fn put_i16(self: &mut Self, value: i16) {
+        self.put_u16(value as u16)
+    }
+    fn put_i8(self: &mut Self, value: i8) {
+        self.put_u8(value as u8)
+    }
+
     /// Put unsigned value to compressed variable-length format, `Smartint` in the bipack
     /// terms. This format is used to store size of variable-length binaries and strings.
     /// Use [crate::bipack_source::BipackSource::get_unsigned] to unpack it.

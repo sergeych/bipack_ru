@@ -61,6 +61,19 @@ pub trait BipackSource {
         Ok(((self.get_u32()? as u64) << 32) | (self.get_u32()? as u64))
     }
 
+    fn get_i64(self: &mut Self) -> Result<i64> {
+        Ok(self.get_u64()? as i64)
+    }
+    fn get_i32(self: &mut Self) -> Result<i32> {
+        Ok(self.get_u32()? as i32)
+    }
+    fn get_i16(self: &mut Self) -> Result<i16> {
+        Ok(self.get_u16()? as i16)
+    }
+    fn get_i8(self: &mut Self) -> Result<i8> {
+        Ok(self.get_u8()? as i8)
+    }
+
     /// Unpack variable-length packed unsigned value, used aslo internally to store size
     /// of arrays, binary data, strings, etc. To pack use
     /// [crate::bipack_sink::BipackSink::put_unsigned()].
